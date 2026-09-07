@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 1 课 · 鸟瞰：codex-rs 是一座什么形状的仓库</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <p class="kicker">codex-harness · Lesson 0001 · 15-25 min</p>
+  <h1>鸟瞰：codex-rs 是一座什么形状的仓库</h1>
+  <p class="subtitle">你听说"Codex harness 开源了"。这一课先搞清楚：开源出来的到底是什么形状的东西。</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-question"><span class="tag">先猜再看 · 不要查</span>这个开源仓库的 Rust workspace（codex-rs）里，大约有多少个 crate？</p>
+    <button class="quiz-option" data-correct="false">30 个上下——一个内核加些工具</button>
+    <button class="quiz-option" data-correct="false">70 个上下——内核加几类基础设施</button>
+    <button class="quiz-option" data-correct="true">137 个——一座分层小城市</button>
+    <button class="quiz-option" data-correct="false">200 个以上——微服务式全家桶</button>
+    <div class="quiz-feedback">137 个（口径 2026-08 的 workspace members）。这个数字本身就是本课的核心知识点：开源出来的主体不是一小段"agent 循环"，而是一整套环绕模型的<strong>环境设施</strong>。下面我们会看这座城市的分区。</div>
+  </div>
+
+  <h2>1 · 什么被开源了</h2>
+  <p>先对齐事实，四个都可以点进原文核对：</p>
+  <ul>
+    <li>仓库是 <a href="https://github.com/openai/codex">openai/codex</a>，Apache-2.0 协议，主体是 Rust workspace <code>codex-rs</code>。</li>
+    <li>Codex CLI、桌面 App（<code>codex app</code>）、IDE 扩展（VS Code 等）共用这一个内核——README 原话："Lightweight coding agent that runs in your terminal"，而 <a href="https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md">app-server 的 README</a> 说它是 "the interface Codex uses to power rich interfaces such as the Codex VS Code extension"。</li>
+    <li>workspace 里有 <strong>137 个 crate</strong>（<a href="https://github.com/openai/codex/blob/main/codex-rs/Cargo.toml">Cargo.toml members</a>）。</li>
+    <li>其中 <code>core</code> 是最大的一个 crate——大到仓库自己的 <a href="https://github.com/openai/codex/blob/main/AGENTS.md">AGENTS.md</a> 写着 "resist adding code to codex-core"。</li>
+  </ul>
+
+  <aside class="margin-note">一个 crate ≈ 一个独立编译的 Rust 包，可以粗略类比 npm 的一个 package。137 个 crate = 137 个有边界的模块。</aside>
+
+  <blockquote>
+    最小的事实，最大的启示：你平时说的 "agent loop" 只是这座城市里的一个街区（core），而城市的大部分面积是别的。
+    <span class="src">—— 本课核心洞察</span>
+  </blockquote>
+
+  <h2>2 · 分层地图</h2>
+  <p>把 137 个 crate 按职责切成三带（完整速查版在 <a href="../reference/codex-rs-map.html">reference/codex-rs-map</a>，建议留着当索引）：</p>
+
+  <div class="map">
+    <div class="map-band">
+      <p class="map-band-title">入口层 FRONTENDS —— 把某种界面接进内核</p>
+      <span class="pill hl">cli → <code>codex</code> 主命令</span>
+      <span class="pill">tui → 终端交互界面</span>
+      <span class="pill">exec → <code>codex-exec</code> 非交互</span>
+      <span class="pill">app-server → JSON-RPC（App / IDE 用）</span>
+      <span class="pill">mcp-server → 暴露为 MCP server（原型）</span>
+    </div>
+
+    <div class="map-band kernel">
+      <p class="map-band-title">内核层 KERNEL —— agent 的大脑</p>
+      <span class="pill hl">core（最大 crate：loop · thread · context · 工具编排）</span>
+      <span class="pill">protocol（Op / EventMsg）</span>
+      <span class="pill">tools</span>
+      <span class="pill">apply-patch</span>
+      <span class="pill">prompts</span>
+    </div>
+
+    <div class="map-band">
+      <p class="map-band-title">基础设施层 INFRASTRUCTURE —— 环绕大脑的器官</p>
+      <span class="pill">安全策略 ≈8：sandboxing · execpolicy · linux-sandbox · bwrap …</span>
+      <span class="pill">记忆状态 ≈6：rollout · thread-store · history …</span>
+      <span class="pill">模型接入 ≈9：model-provider-info · codex-api · ollama …</span>
+      <span class="pill">扩展生态 20+：skills · plugin · hooks · ext/* …</span>
+      <span class="pill">云端与 utils：cloud-tasks · 大量工具库</span>
+    </div>
+  </div>
+
+  <aside class="margin-note">注意数量的分布：入口 6 个、内核不到 10 个、剩下 120 个左右都在基础设施和扩展生态。这就是"开源的主体是环境工程"的直观版本。</aside>
+
+  <p>这正对应你已经熟悉的 harness engineering 判断：<strong>把模型当固定 worker，工程量全在环境上</strong>。OpenAI 自己的仓库结构就是这个论点的证据——loop 很小，环境很大。</p>
+
+  <h2>3 · 一次任务的粗路径</h2>
+  <p>你在终端敲一句"帮我修这个测试"，粗粒度上经过这几站（每站一句话，细节留给后面的课）：</p>
+
+  <ol class="flow">
+    <li><strong>入口</strong>：<code>cli</code> 启动，交互模式落到 <code>tui</code>，你的输入变成一个 <code>Op</code>（操作请求）。</li>
+    <li><strong>词汇表</strong>：<code>protocol</code> crate 定义 <code>Op</code> 和 <code>EventMsg</code>——前后端之间只说这套话（<a href="https://github.com/openai/codex/blob/main/codex-rs/protocol/src/protocol.rs">protocol.rs</a> 里两个大枚举）。</li>
+    <li><strong>内核</strong>：<code>core</code> 接管：装配上下文（该给模型看什么）、发起推理请求。</li>
+    <li><strong>工具执行</strong>：模型要跑命令/改文件 → <code>tools</code> 编排，<code>sandboxing</code> + <code>execpolicy</code> 决定"允不允许、怎么拦"，<code>apply-patch</code> 负责把模型输出落成文件改动。</li>
+    <li><strong>结果回填</strong>：工具输出作为新的输入回到模型，循环直到任务完成。</li>
+    <li><strong>事件外送</strong>：全程每一步都以 <code>EventMsg</code> 流回前端渲染；同时 <code>rollout</code> 把事件流落盘——这就是以后 resume 会话的底子。</li>
+  </ol>
+
+  <aside class="margin-note">第 2 课就钻进第 3、5 步之间的循环体。现在你只需要记住" vocabulary → brain → hands → feedback "这个骨架。</aside>
+
+  <h2>4 · 和你已有框架对上</h2>
+  <p>你整理过的五杠杆，在这张地图上都有具体格子（这就是整个课程的骨架预告）：</p>
+
+  <table>
+    <thead><tr><th>harness engineering 杠杆</th><th>codex-rs 里的落点</th><th>对应课</th></tr></thead>
+    <tbody>
+      <tr><td>Context 上下文</td><td><code>core</code> 的 context / prompts</td><td>第 6 课</td></tr>
+      <tr><td>Tools 工具</td><td><code>tools</code> · <code>apply-patch</code> · <code>ext/*</code></td><td>第 5 课</td></tr>
+      <tr><td>Permissions 权限</td><td><code>sandboxing</code> · <code>execpolicy</code></td><td>第 4 课</td></tr>
+      <tr><td>Proof 证明</td><td>turn_diff_tracker · guardian（core 内模块）</td><td>第 4-5 课</td></tr>
+      <tr><td>Feedback 反馈</td><td><code>rollout</code> · <code>history</code> · memories</td><td>第 6 课</td></tr>
+    </tbody>
+  </table>
+
+  <h2>检索练习</h2>
+  <p>不翻上文，凭记忆答：</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-question"><span class="tag">检索 1</span>想研究"Codex 在 macOS 上怎么拦截未授权的文件写入"，应该先看哪个 crate？</p>
+    <button class="quiz-option" data-correct="false">rollout</button>
+    <button class="quiz-option" data-correct="true">sandboxing</button>
+    <button class="quiz-option" data-correct="false">prompts</button>
+    <button class="quiz-option" data-correct="false">model-provider</button>
+    <div class="quiz-feedback">安全与策略组：<code>sandboxing</code> 是入口（macOS 上配套 Seatbelt 机制，第 4 课展开）；rollout 是会话持久化，prompts 是提示词，model-provider 是模型接入。</div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-question"><span class="tag">检索 2</span>VS Code 扩展与 Codex 内核之间通过什么对话？</p>
+    <button class="quiz-option" data-correct="false">共享数据库轮询读写</button>
+    <button class="quiz-option" data-correct="false">各自内嵌一份模型副本</button>
+    <button class="quiz-option" data-correct="true">app-server 上的 JSON-RPC</button>
+    <button class="quiz-option" data-correct="false">由 shell 子进程互相转发</button>
+    <div class="quiz-feedback">app-server 用 JSON-RPC 2.0 说话（stdio / websocket / unix socket 传输）。注意它和 MCP 长得像但不是一回事——这个"像"本身是第 3 课的伏笔。</div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-question"><span class="tag">检索 3</span>137 个 crate 里，数量占比最大的一类是？</p>
+    <button class="quiz-option" data-correct="false">内核本体（agent loop）</button>
+    <button class="quiz-option" data-correct="false">前端界面（CLI / TUI / App）</button>
+    <button class="quiz-option" data-correct="true">基础设施与扩展生态</button>
+    <button class="quiz-option" data-correct="false">模型接入与鉴权</button>
+    <div class="quiz-feedback">内核不到 10 个、入口约 6 个，其余 120 个左右都是环境设施：安全、记忆、扩展、utils。harness 的本体是环境工程。</div>
+  </div>
+
+  <div class="exercise">
+    <p><strong>动手 5 分钟（可选但强烈建议）</strong>——亲手验证今天的事实。先进入 checkout 根目录，再跑三条命令（<code>pwd</code> 确认自己在 <code>openai-codex</code> 里）：</p>
+<pre><code>cd ~/agent-playground/repos/external/openai-codex
+
+# 1. 数一数 crate 到底多少个
+awk '/^members = \[/,/^\]/' codex-rs/Cargo.toml | grep -c '"'
+
+# 2. 找到前后端的"词汇表"——两个大枚举
+grep -n "pub enum Op\b\|pub enum EventMsg" codex-rs/protocol/src/protocol.rs
+
+# 3. 看 app-server 的自我介绍
+head -8 codex-rs/app-server/README.md</code></pre>
+    <p>期望输出：137；两处带行号的枚举定义；README 第一段的 "power rich interfaces"。没有本地 checkout 的话，在 GitHub 上打开 <a href="https://github.com/openai/codex/blob/main/codex-rs/Cargo.toml">Cargo.toml</a> 数 members 也算。</p>
+  </div>
+
+  <h2>本课一页纸</h2>
+  <ul>
+    <li>开源的是整套 harness：137 个 crate，CLI / App / IDE 共用一个内核。</li>
+    <li>三带结构：入口层（接界面）→ 内核层（core + protocol + tools，小而重）→ 基础设施层（安全 / 记忆 / 模型接入 / 扩展，大而散）。</li>
+    <li>一次任务的骨架：词汇表 <code>protocol</code>（Op / EventMsg）→ 大脑 <code>core</code> → 双手（<code>tools</code> + <code>sandboxing</code>）→ 回流（EventMsg 给前端，rollout 落盘）。</li>
+  </ul>
+
+  <div class="lesson-footer">
+    <p><strong>下一课预告</strong>：Agent loop——钻进 core，看一次 turn 的完整生命周期（为什么 context"只增不改"、模型流式响应怎么变成工具调用）。</p>
+    <p><strong>追问随时开</strong>：把任何疑问直接丢回对话，比如"apply-patch 为什么不直接让模型跑 sed"就是好问题。查证后我会把值得沉淀的结论记进 <a href="../reference/glossary.html">术语表</a>与 <a href="../reference/codex-rs-map.html">速查地图</a>，理解到位再写学习记录。</p>
+    <p class="no-print">口径：事实核查于本地 checkout（2026-08-27，main）；链接指向 GitHub main，若上游重构以仓库为准。</p>
+  </div>
+</main>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>速查 · codex-rs 分层地图</title>
+<link rel="stylesheet" href="../assets/course.css">
+<style>
+  body { font-size: 15.5px; }
+  .count { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Reference · 001</p>
+  <h1>codex-rs 分层地图</h1>
+  <p class="subtitle">openai/codex 仓库速查 · 口径 2026-08（main）· 137 个 workspace crate</p>
+
+  <p>药丸为代表性 crate（非全集，完整清单见 <a href="https://github.com/openai/codex/blob/main/codex-rs/Cargo.toml">codex-rs/Cargo.toml</a>）。<span class="hl-pill">高亮</span>表示该组的"第一入口"。</p>
+
+  <div class="map">
+    <div class="map-band">
+      <p class="map-band-title">入口层 FRONTENDS —— 把某种界面接进内核</p>
+      <p>同一个内核，五种进入方式：</p>
+      <span class="pill hl">cli → <code>codex</code> 主命令</span>
+      <span class="pill">tui → 终端交互界面</span>
+      <span class="pill">exec → <code>codex-exec</code> 非交互</span>
+      <span class="pill">app-server → JSON-RPC（App / IDE）</span>
+      <span class="pill">mcp-server → 把 Codex 暴露为 MCP server（原型）</span>
+      <p>周边：app-server-transport / app-server-protocol / app-server-daemon / exec-server</p>
+    </div>
+
+    <div class="map-band kernel">
+      <p class="map-band-title">内核层 KERNEL —— agent 的大脑</p>
+      <p>数量最少、体积最大的一层：</p>
+      <span class="pill hl">core —— agent loop · thread/session · context · 工具编排（最大 crate）</span>
+      <span class="pill">protocol —— Op / EventMsg 词汇表</span>
+      <span class="pill">tools</span>
+      <span class="pill">apply-patch —— 模型输出 → 文件补丁</span>
+      <span class="pill">prompts</span>
+      <span class="pill">shell-command</span>
+      <span class="pill">core-api / core-plugins</span>
+    </div>
+
+    <div class="map-band">
+      <p class="map-band-title">基础设施层 INFRASTRUCTURE —— 环绕大脑的器官</p>
+
+      <h3>安全与策略 <span class="count">≈ 8</span></h3>
+      <p>决定"能不能做"：</p>
+      <span class="pill hl">sandboxing</span>
+      <span class="pill">linux-sandbox</span>
+      <span class="pill">bwrap（bubblewrap）</span>
+      <span class="pill">execpolicy —— 审批策略引擎</span>
+      <span class="pill">process-hardening</span>
+      <span class="pill">network-proxy</span>
+      <span class="pill">shell-escalation</span>
+      <span class="pill">secrets</span>
+
+      <h3>记忆与状态 <span class="count">≈ 6</span></h3>
+      <p>会话持久化与恢复：</p>
+      <span class="pill hl">rollout —— 会话回放 / resume</span>
+      <span class="pill">rollout-trace</span>
+      <span class="pill">thread-store</span>
+      <span class="pill">state</span>
+      <span class="pill">history</span>
+      <span class="pill">agent-graph-store</span>
+
+      <h3>模型接入 <span class="count">≈ 9</span></h3>
+      <p>把"大脑"接到各种模型后端：</p>
+      <span class="pill hl">model-provider-info</span>
+      <span class="pill">model-provider</span>
+      <span class="pill">codex-api / codex-client</span>
+      <span class="pill">backend-client</span>
+      <span class="pill">responses-api-proxy</span>
+      <span class="pill">ollama / lmstudio</span>
+      <span class="pill">http-client</span>
+
+      <h3>扩展生态 <span class="count">≈ 20+</span></h3>
+      <p>数量最大的一组——harness 的主体是环境工程：</p>
+      <span class="pill hl">skills</span>
+      <span class="pill">plugin</span>
+      <span class="pill">hooks</span>
+      <span class="pill">connectors</span>
+      <span class="pill">code-mode 家族 ×5</span>
+      <span class="pill">ext/ ×13（agent · mcp · skills · web-search · memories · goal · queue …）</span>
+
+      <h3>云端与支撑 <span class="count">其余 ≈ 80</span></h3>
+      <p>cloud-tasks / cloud-config（云端任务），login，以及大量 utils/*（路径、缓存、PTY、流解析……）</p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>想研究……</th><th>先去……</th><th>为什么</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>一次对话里模型被喂了什么</td><td><code>core</code>（context / context_manager / prompts）</td><td>上下文装配全在内核完成</td></tr>
+      <tr><td>模型怎么改文件</td><td><code>tools</code> + <code>apply-patch</code></td><td>补丁格式 + 应用与校验</td></tr>
+      <tr><td>危险命令怎么被拦</td><td><code>sandboxing</code> + <code>execpolicy</code></td><td>沙箱执行 + 审批判定分离</td></tr>
+      <tr><td>会话怎么恢复</td><td><code>rollout</code> + <code>thread-store</code></td><td>事件流落盘 + 线程索引</td></tr>
+      <tr><td>IDE 扩展怎么通信</td><td><code>app-server</code></td><td>JSON-RPC 2.0，stdio/ws/unix 传输</td></tr>
+      <tr><td>前后端的消息词汇</td><td><code>protocol/src/protocol.rs</code></td><td><code>Op</code> 与 <code>EventMsg</code> 枚举</td></tr>
+    </tbody>
+  </table>
+
+  <div class="lesson-footer">
+    <p>口径说明：crate 数按 workspace members 数组（137）计；分组是教学口径而非官方分类。事实来源：<a href="https://github.com/openai/codex">openai/codex</a>（本地核查 2026-08-27，89650c66f2）。</p>
+  </div>
+</main>
+</body>
+</html>

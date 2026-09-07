@@ -1,0 +1,321 @@
+/* codex-harness track · shared course stylesheet
+   纸面风格：衬线正文、宽留白、锈橙点缀（呼应 Rust）。打印友好。 */
+
+:root {
+  --paper: #fcfaf6;
+  --ink: #26221c;
+  --ink-soft: #5c564b;
+  --ink-faint: #8a8274;
+  --accent: #b45309;      /* 锈橙 */
+  --accent-soft: #f5e3d0;
+  --line: #e2dccf;
+  --ok: #3f7d4e;
+  --ok-soft: #e4efe2;
+  --bad: #b3403a;
+  --bad-soft: #f6e4e2;
+  --serif: Georgia, "Times New Roman", "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  --mono: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--paper); }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.85;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 3.5rem 1.4rem 5rem;
+}
+
+/* ---------- 头部 ---------- */
+
+.kicker {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.6rem;
+}
+
+h1 {
+  font-size: 1.9rem;
+  line-height: 1.35;
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: var(--ink-soft);
+  font-style: italic;
+  margin: 0 0 1.6rem;
+}
+
+h2 {
+  font-size: 1.28rem;
+  margin: 3rem 0 0.8rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+}
+
+h3 { font-size: 1.05rem; margin: 1.8rem 0 0.5rem; }
+
+p { margin: 0 0 1rem; }
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+strong { font-weight: 700; }
+
+/* ---------- 侧注 ---------- */
+
+.margin-note {
+  float: right;
+  clear: right;
+  width: 15rem;
+  margin: 0.2rem -17.5rem 1rem 1.4rem;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  border-left: 2px solid var(--accent-soft);
+  padding-left: 0.8rem;
+}
+
+@media (max-width: 76rem) {
+  .margin-note {
+    float: none;
+    width: auto;
+    margin: 1rem 0;
+    background: #f6f1e7;
+    padding: 0.7rem 1rem;
+    border-left: 3px solid var(--accent);
+  }
+}
+
+/* ---------- 代码 ---------- */
+
+code {
+  font-family: var(--mono);
+  font-size: 0.84em;
+  background: #f1ece1;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+pre {
+  background: #f6f2e9;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.9rem 1.1rem;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+pre code { background: none; padding: 0; }
+
+/* ---------- 引用块 ---------- */
+
+blockquote {
+  margin: 1.4rem 0;
+  padding: 0.2rem 1.2rem;
+  border-left: 3px solid var(--accent);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+blockquote .src { display: block; margin-top: 0.4rem; font-size: 0.8rem; font-style: normal; color: var(--ink-faint); }
+
+/* ---------- 分层地图 ---------- */
+
+.map { margin: 1.6rem 0; }
+
+.map-band {
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.7rem;
+  background: #fffdf9;
+}
+
+.map-band.kernel { border-color: var(--accent); background: #fdf7ef; }
+
+.map-band-title {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin: 0 0 0.5rem;
+}
+
+.map-band.kernel .map-band-title { color: var(--accent); font-weight: 700; }
+
+.map-band p { margin: 0 0 0.55rem; font-size: 0.92rem; color: var(--ink-soft); }
+
+.pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.08rem 0.6rem;
+  margin: 0.15rem 0.18rem 0.15rem 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.pill.hl { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+
+/* ---------- 流程行 ---------- */
+
+.flow { list-style: none; margin: 1.4rem 0; padding: 0; counter-reset: step; }
+
+.flow > li {
+  counter-increment: step;
+  position: relative;
+  padding: 0 0 1.1rem 2.6rem;
+  border-left: 2px solid var(--line);
+  margin-left: 1rem;
+}
+
+.flow > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+
+.flow > li::before {
+  content: counter(step);
+  position: absolute;
+  left: -0.95rem;
+  top: 0.1rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- 表格 ---------- */
+
+table { border-collapse: collapse; width: 100%; margin: 1.4rem 0; font-size: 0.92rem; }
+
+th, td { border: 1px solid var(--line); padding: 0.5rem 0.7rem; text-align: left; vertical-align: top; }
+
+th { background: #f6f1e7; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.04em; }
+
+td code { font-size: 0.8em; }
+
+/* ---------- 测验 ---------- */
+
+.quiz {
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  padding: 1.1rem 1.3rem;
+  margin: 1.6rem 0;
+  background: #fffdf9;
+}
+
+.quiz-question { font-weight: 700; margin: 0 0 0.8rem; }
+
+.quiz-question .tag {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.quiz-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  padding: 0.55rem 0.9rem;
+  margin: 0.4rem 0;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.quiz-option:hover:not(:disabled) { border-color: var(--accent); }
+
+.quiz.answered .quiz-option { cursor: default; color: var(--ink-faint); }
+
+.quiz.answered .quiz-option.correct {
+  border-color: var(--ok);
+  background: var(--ok-soft);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.quiz.answered .quiz-option.wrong {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+  color: var(--ink);
+}
+
+.quiz-feedback {
+  display: none;
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--line);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.quiz-feedback::before { content: "为什么："; font-weight: 700; color: var(--accent); }
+
+.quiz.answered .quiz-feedback { display: block; }
+
+/* ---------- 练习/动手块 ---------- */
+
+.exercise {
+  border: 1.5px dashed var(--accent);
+  border-radius: 8px;
+  padding: 1.1rem 1.3rem;
+  margin: 1.8rem 0;
+  background: #fffdf9;
+}
+
+.exercise > :first-child { margin-top: 0; }
+.exercise > :last-child { margin-bottom: 0; }
+
+/* ---------- 页脚 ---------- */
+
+.lesson-footer {
+  margin-top: 3.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+/* ---------- 打印 ---------- */
+
+@media print {
+  html { background: #fff; }
+  body { font-size: 11.5pt; }
+  .no-print { display: none !important; }
+  .quiz-option { border: 1px solid #999; }
+  .quiz-feedback { display: block; }
+  a { color: inherit; }
+  main { max-width: none; padding: 0; }
+  .map-band { break-inside: avoid; }
+}

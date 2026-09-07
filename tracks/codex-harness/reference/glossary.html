@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>速查 · codex-harness 术语表</title>
+<link rel="stylesheet" href="../assets/course.css">
+<style>
+  body { font-size: 15.5px; }
+  .count { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-faint); margin-left: 0.5em; }
+  .entry { margin: 0 0 0.75rem; line-height: 1.65; }
+  .entry strong { font-family: var(--mono); font-weight: 600; }
+  h2 { margin-top: 2.2rem; }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Reference · 002</p>
+  <h1>codex-harness 术语表</h1>
+  <p class="subtitle">中英对照速查 · 口径 2026-08-27（openai/codex main）· 随课程滚动增补</p>
+
+  <p>每条给一句话定义 + 仓库锚点。锚点是本地 checkout 中的位置，GitHub 上按 main 分支对号入座。分组即心智模型：<strong>循环</strong>是引擎，<strong>词汇表</strong>是边界上的合同，<strong>账本</strong>是持久化，<strong>安全</strong>分判定与执行两层。</p>
+
+  <h2>① 循环与组织</h2>
+  <p class="entry"><strong>crate</strong><span class="count">Rust 编译/打包单位</span><br>Rust 里一个目录一个 crate，是最小的可复用模块单位。codex-rs workspace 共 137 个。</p>
+  <p class="entry"><strong>workspace</strong><span class="count">codex-rs/Cargo.toml</span><br>共享依赖与构建配置的 crate 集合，整个 codex-rs 是一个 workspace。</p>
+  <p class="entry"><strong>agent loop</strong><span class="count">core</span><br>模型 → 工具调用 → 结果回流 → 再模型的循环，agent 的引擎。第 2 课主菜。</p>
+  <p class="entry"><strong>turn</strong><span class="count">protocol · "Submission operation"</span><br>一次用户提交（submission）到任务完成的周期。TurnContextItem "Persist once per real user turn"。</p>
+
+  <h2>② 词汇表——协议家族</h2>
+  <p class="entry"><strong>Op</strong><span class="count">protocol/src/protocol.rs:573</span><br>前端 → 内核的请求词（"Submission operation"）：Interrupt 打断、ExecApproval 审批答复、UserInputAnswer 追问答复、RealtimeConversation* 一族（实时语音）。</p>
+  <p class="entry"><strong>EventMsg</strong><span class="count">protocol/src/protocol.rs:1335</span><br>内核 → 前端的事件词（"Response event from the agent"）：Error、Warning 等。与 Op 构成一对请求/响应。</p>
+  <p class="entry"><strong>protocol（crate）</strong><span class="count">codex-rs/protocol</span><br>进程内边界的词汇表。TUI 用它，app-server 内部也 submit(Op::…)——后者对外翻译 JSON-RPC、对内说 Op。</p>
+  <p class="entry"><strong>app-server-protocol</strong><span class="count">codex-rs/app-server-protocol/src/protocol/v2/</span><br>跨进程边界（App / IDE ↔ app-server）的 JSON-RPC 词汇，方法按 <code>&lt;resource&gt;/&lt;method&gt;</code> 命名：thread/read、thread/resume、thread/fork、thread/rollback。v2 是活跃版本。</p>
+  <p class="entry"><strong>MCP</strong><span class="count">codex-rs/mcp-server</span><br>Model Context Protocol，对接外部工具/资源生态的标准协议。mcp-server crate（官方自称 Prototype）还能把 Codex 自己暴露为 MCP server。</p>
+  <p class="entry"><strong>InterAgentCommunication</strong><span class="count">protocol/src/protocol.rs:783</span><br>多 agent 之间的通信消息，同时也作为一种 RolloutItem 进账本——agent 间协作也在被誊录。</p>
+
+  <h2>③ 账本——rollout 家族</h2>
+  <p class="entry"><strong>rollout</strong><span class="count">codex-rs/rollout · $CODEX_HOME/sessions/</span><br>会话逐笔展开的记录（JSONL，<code>rollout-&lt;时间戳&gt;-&lt;会话id&gt;.jsonl</code>）。取字面义"展开"，非"灰度发布"。首提交 2025-05-07 #845 "save session transcripts"；2026-03-24 #15548 抽成独立 crate。写入走异步队列，失败可重试，不阻塞前端。</p>
+  <p class="entry"><strong>RolloutItem</strong><span class="count">history/src/lib.rs:96</span><br>账本条目，十种变体：SessionMeta / ResponseItem / InterAgentCommunication / Compacted / TurnContext / WorldState / SecurityRiskScore / EventMsg / RealtimeItem / 元数据变体。账本 ≠ 聊天记录。</p>
+  <p class="entry"><strong>Compacted</strong><span class="count">history/src/lib.rs:147</span><br>上下文压缩事件：message（摘要）+ <strong>replacement_history</strong>（压缩后的替换历史）+ window 链（window_id / previous_window_id / first_window_id）——压缩是有谱系的窗口链，不是一次性摘要。resume 靠它还原"压缩后"的上下文视图。</p>
+  <p class="entry"><strong>WorldState</strong><span class="count">protocol/src/protocol.rs:3109</span><br>世界状态 diff 基准（"resume model-visible world-state diffing"）：full=true 全量快照建基线，full=false 增量补丁更新基线。resume 后据此继续算"世界变了什么"。</p>
+  <p class="entry"><strong>SecurityRiskScore</strong><span class="count">protocol/src/security_risk.rs:13</span><br>安全风险分类器的打分快照（scores + call_id + action）。注释明说"must not enter model-visible conversation context or user-visible thread item projections"——不给模型看、不给界面看的纯审计条目。</p>
+  <p class="entry"><strong>TurnContext</strong><span class="count">protocol/src/protocol.rs</span><br>每个真实用户轮次持久化一次（轮中压缩后再记一次），"so resume/fork replay can recover the latest durable baseline"。</p>
+  <p class="entry"><strong>RealtimeItem</strong><span class="count">history/src/lib.rs:108</span><br>"Sparse, model-invisible facts used to reconstruct realtime presentation"——重建实时（语音）会话演示用的稀疏事实，模型不可见。</p>
+  <p class="entry"><strong>resume</strong><span class="count">cli · codex resume</span><br>按账本把会话接回来的正式命令（另见 thread/resume、thread/rollback、thread/fork）。</p>
+  <p class="entry"><strong>CodexHarnessMetadata</strong><span class="count">history/src/rollout_payload.rs:30</span><br>账本条目可携带的"harness 元数据"——仓库自己就用 harness 称呼这一层。</p>
+
+  <h2>④ 安全——判定与执行</h2>
+  <p class="entry"><strong>SandboxMode</strong><span class="count">protocol/src/config_types.rs:104</span><br>三档预设：read-only（默认）/ workspace-write / danger-full-access。</p>
+  <p class="entry"><strong>SandboxPolicy</strong><span class="count">protocol/src/protocol.rs:1049</span><br>更细粒度的沙箱策略，如 ReadOnly { network_access: bool }——read-only 档默认禁网。</p>
+  <p class="entry"><strong>sandboxing（crate）</strong><span class="count">codex-rs/sandboxing/src/</span><br>执行层，按 OS 分家：seatbelt.rs（macOS）/ landlock.rs（Linux）/ bwrap.rs（bubblewrap）/ windows.rs，另有 violation（违规上报）、policy_transforms、manager。</p>
+  <p class="entry"><strong>.sbpl</strong><span class="count">sandboxing/src/*.sbpl</span><br>Seatbelt 策略文件格式，仓库里有四份：base / network / preferences / restricted_read_only_platform_defaults。</p>
+  <p class="entry"><strong>execpolicy</strong><span class="count">codex-rs/execpolicy</span><br>判定层：命令级审批的规则引擎。输入待执行命令，输出 allow / prompt / forbidden。</p>
+  <p class="entry"><strong>prefix_rule</strong><span class="count">execpolicy/README.md</span><br>execpolicy 的规则形态：pattern（有序 token，列表=可选）+ decision + justification + match/not_match（随规则自带、加载时验证的单元测试）。</p>
+  <p class="entry"><strong>Starlark</strong><span class="count">github.com/bazelbuild/starlark</span><br>execpolicy 的规则语言：Python 方言的配置语言，为 Bazel 而生。确定性（同输入同输出）、hermetic（摸不到文件/网络/时钟）、可嵌入——安全执行不可信代码的中间态。</p>
+
+  <h2>⑤ 留给后续课程的词</h2>
+  <p class="entry"><strong>apply-patch</strong>（L5：模型输出 → 文件补丁）· <strong>skills</strong>（L5：可安装能力包）· <strong>compact 文件族</strong>（L6：compact.rs / compact_token_budget.rs / compact_model_fallback.rs / compact_remote*.rs）· <strong>app-server v2</strong>（L3：方法族全图）</p>
+
+  <div class="lesson-footer">
+    <p>相关速查：<a href="codex-rs-map.html">codex-rs 分层地图</a> · 已学课程：<a href="../lessons/0001-codex-rs-repo-map.html">0001 仓库地图</a></p>
+    <p class="no-print">口径：事实核查于本地 checkout（2026-08-27，main @ 89650c66f2）；上游重构以仓库为准。</p>
+  </div>
+</main>
+</body>
+</html>

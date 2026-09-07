@@ -15,6 +15,7 @@ The repository is public by design. Lessons may be validated against authorized 
 | Track | Mission | Status |
 | --- | --- | --- |
 | [`java-backend-engineering`](./tracks/java-backend-engineering/) | Learn to trace, change, test, and explain enterprise Java backend behavior | Setting the foundation |
+| [`codex-harness`](./tracks/codex-harness/) | Build a concept-level map of the open-sourced Codex agent harness (codex-rs): mechanisms, trade-offs, and crate-level evidence | Lesson 0001 published |
 
 ## How a track works
 
