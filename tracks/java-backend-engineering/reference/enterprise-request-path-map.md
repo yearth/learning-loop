@@ -1,9 +1,9 @@
 # Reference: Enterprise Java Request-Path Map
 
-A prior map of how an enterprise Java backend is layered. It is the skeleton that
-lessons verify, correct, and annotate against authorized real projects — it is a
-hypothesis until a trace confirms each region. Layer names vary by codebase;
-responsibilities do not. Classify by responsibility, not by class name.
+An illustrative map of common enterprise Java backend responsibilities.
+It does not describe or verify any particular system. Applications may combine
+layers or use different process boundaries and protocols. Classify by
+responsibility, not by class name.
 
 ## Two views of "layering"
 
@@ -99,21 +99,6 @@ timeouts, so the innermost hop times out first and errors bubble up quickly —
 no hop does doomed work. Circuit breaking (pause calls after consecutive
 failures, probe periodically) and rate limiting (reject excess load to protect
 the pool) are the adjacent defenses.
-
-## Verification status (2026-09-07)
-
-- **Confirmed against an authorized enterprise codebase** (read-only, names
-  withheld): the web tier has no data-access code and exits via generated RPC
-  client stubs (package scan + build-dependency inspection); edge auth runs as
-  an in-process interceptor from a shared library, delegating identity
-  resolution via RPC to a remote unified auth service (import-chain trace +
-  bytecode inspection); auth failure returns a valid HTTP response — a redirect
-  or a JSON error body — i.e. transport success + business failure.
-- **Concept-verified by self-explanation** (no code trace yet): failure
-  taxonomy transport vs business; orphan work and timeout budget; the
-  Little's Law cascade mechanism.
-- **Still hypothesis**: gateway-tier coarse auth; actual timeout-budget values
-  (absent from deployment files; presumed in a config center).
 
 ## How the curriculum traverses this map
 

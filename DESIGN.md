@@ -22,7 +22,7 @@ learning-loop/
         ├── NOTES.md          # local only, ignored by Git
         ├── lessons/          # created when the first lesson exists
         ├── reference/        # created when reusable reference material exists
-        ├── learning-records/ # created after learning is demonstrated
+        ├── learning-records/ # local only, ignored by Git
         └── assets/           # created when a lesson needs reusable components
 ```
 
@@ -38,7 +38,7 @@ Each lesson follows this loop:
 6. Record learning only after the learner demonstrates understanding.
 7. Publish only a generalized lesson built from public sources and original synthetic examples.
 
-Coverage is not treated as evidence of learning. Learning records capture demonstrated capability, corrected misconceptions, prior knowledge that changes the teaching level, or a meaningful change to the mission.
+Coverage is not treated as evidence of learning. Learning records stay local and are excluded from publication. They capture demonstrated capability, corrected misconceptions, prior knowledge that changes the teaching level, or a meaningful change to the mission.
 
 ## Private evidence and public knowledge
 
@@ -71,7 +71,7 @@ Go is intentionally deferred. A future Go track should transfer established back
 
 ## Git and publication
 
-The canonical local project lives under `products/learning-loop`. Because that path inherits the machine's work identity, the repository uses a local Git identity of `yearthmain <yearthmain@gmail.com>`.
+Verify the intended personal Git author identity before committing or publishing.
 
 The intended remote is a public GitHub repository. Original learning content uses CC BY 4.0; original source code, code samples, and executable components use the MIT License. Third-party material retains its original terms. Creating the remote and pushing are separate publication decisions. Each external write requires an explicit review of the target, content, identity, and side effects.
 

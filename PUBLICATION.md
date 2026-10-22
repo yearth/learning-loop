@@ -7,7 +7,6 @@ This repository is intended to be public from its first remote commit. Every tra
 - Transferable technical concepts supported by public sources
 - Original explanations, diagrams, exercises, and synthetic examples
 - Generic architecture with non-identifying component names
-- Learning records that state demonstrated capabilities without private context
 - Assets that are original, generated with documented provenance, or licensed for reuse
 
 ## Material that must never be committed
@@ -17,7 +16,8 @@ This repository is intended to be public from its first remote commit. Every tra
 - Business data, user data, employee information, account details, portfolio values, addresses, contracts, or private conversations
 - Cookies, tokens, credentials, request signatures, environment files, or unredacted network requests
 - Internal documentation, screenshots, logs, metrics, traces, incident details, or unpublished business rules
-- Local notes under `NOTES.md`, `private/`, or `raw/`
+- Personal assessments, learning profiles, teaching conversations, and private-project verification records, even when identifying names have been removed
+- Local notes under `NOTES.md`, `learning-records/`, `private/`, or `raw/`
 
 Replacing names with placeholders does not automatically make material safe. A distinctive combination of flow, behavior, and failure semantics may still identify a private system. When publication safety is uncertain, leave the material out.
 
@@ -29,7 +29,7 @@ Public claims should cite public primary sources. Code examples must be independ
 
 ## License classification
 
-- Original prose, lessons, diagrams, learning records, and non-code learning assets use CC BY 4.0.
+- Original prose, lessons, diagrams, and non-code learning assets use CC BY 4.0.
 - Original source code, code samples, and executable components use the MIT License.
 - Third-party material keeps its original license and required attribution.
 - A file-specific license notice takes precedence when a future artifact needs different terms.

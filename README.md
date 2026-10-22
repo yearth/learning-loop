@@ -8,7 +8,7 @@ Learning Loop is a collection of independent learning tracks. Each track has one
 learn -> practice -> feedback -> revise -> retrieve
 ```
 
-The repository is public by design. Lessons may be validated against authorized real-world projects, but this repository contains only transferable knowledge, synthetic examples, and public-safe learning records.
+The repository is public by design. This repository contains transferable knowledge, synthetic examples, and public references. Personal assessments and private-project verification records stay local and are not published.
 
 ## Tracks
 
@@ -25,7 +25,7 @@ Each track owns its learning state:
 - `RESOURCES.md` curates high-trust knowledge sources and real-world feedback channels.
 - `lessons/` contains short, self-contained lessons.
 - `reference/` contains compact material meant for repeated use.
-- `learning-records/` records demonstrated understanding, corrected misconceptions, and meaningful mission changes.
+- `learning-records/` holds local-only personal assessments and learning progress; Git ignores this directory.
 - `assets/` contains reusable components shared by lessons in that track.
 
 Directories are created only when they have real content. Empty scaffolding is deliberately avoided.
@@ -38,6 +38,6 @@ See [PUBLICATION.md](./PUBLICATION.md) before staging or publishing any change. 
 
 ## License
 
-- Original prose, lessons, diagrams, learning records, and non-code learning assets are licensed under [CC BY 4.0](./LICENSE).
+- Original prose, lessons, diagrams, and non-code learning assets are licensed under [CC BY 4.0](./LICENSE).
 - Original source code, code samples, and executable components are licensed under the [MIT License](./LICENSE-CODE).
 - Third-party material remains subject to its original license and attribution requirements.
